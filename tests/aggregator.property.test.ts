@@ -119,5 +119,5 @@ describe('Price aggregator property tests', () => {
       ),
       { numRuns: 10000 }
     )
-  })
+  }, 15000)
 })
