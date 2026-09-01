@@ -32,7 +32,6 @@ import { registerVolumeRoutes } from './routes/volumes'
 import { registerBenchmarkRoutes } from './routes/benchmark'
 import { registerOracleRoutes } from './routes/oracle'
 import { registerBasketRoutes } from './routes/basket'
-import { registerFacilitatorRoutes } from './routes/facilitator'
 import { registerDiscoveryRoutes } from './routes/discovery'
 import { registerSettleRoute } from './routes/facilitator'
 import { fanOutManager } from './ws/fanout'
@@ -141,7 +140,6 @@ async function main() {
   await registerBenchmarkRoutes(app)
   await registerOracleRoutes(app)
   await registerBasketRoutes(app)
-  await registerFacilitatorRoutes(app)
   await registerDiscoveryRoutes(app)
   await registerSettleRoute(app)
   await registerGraphQL(app)
