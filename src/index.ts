@@ -19,16 +19,19 @@ import { registerPairsRoutes } from './routes/pairs'
 import { registerScreenerRoutes } from './routes/screener'
 import { registerHistoryRoutes } from './api/history'
 import { registerX402 } from './middleware/x402'
+import { registerNetworkSelector } from './middleware/network'
 import { registerWebSocket } from './api/websocket'
 import { registerApiKeyAuth } from './api/auth'
 import { registerAdminRoutes } from './api/admin'
 import { registerUsageRoutes } from './api/usage'
+import { registerFacilitatorRoutes } from './api/facilitator'
 import { registerPriceRoutes } from './routes/price'
 import { registerVolumeRoutes } from './routes/volumes'
 import { registerBenchmarkRoutes } from './routes/benchmark'
 import { registerOracleRoutes } from './routes/oracle'
 import { registerBasketRoutes } from './routes/basket'
 import { registerFacilitatorRoutes } from './routes/facilitator'
+import { registerDiscoveryRoutes } from './routes/discovery'
 import { fanOutManager } from './ws/fanout'
 
 import { startSDEXIngester } from './ingesters/sdex'
@@ -61,6 +64,12 @@ async function main() {
   const app = Fastify({ logger: { level: 'warn' } })
   await app.register(cors, { origin: true })
   await app.register(compress)
+
+  // Resolves the per-request Stellar network (?network= query param / x-network
+  // header) onto req.network, validating it (400 on an unrecognised value).
+  // Runs in onRequest, ahead of API-key auth/rate-limiting/x402 and every route
+  // handler, so all of them can read req.network.
+  await app.register(registerNetworkSelector)
 
   // API-key authentication — validates Authorization: Bearer <key> and attaches
   // per-key quota metadata to req.apiKey. Registered BEFORE the rate limiter so
@@ -109,6 +118,7 @@ async function main() {
   // `config.public` so the API-key auth hook skips them.
   await registerAdminRoutes(app)
   await registerUsageRoutes(app)
+  await app.register(registerFacilitatorRoutes)
 
   await app.register(registerX402)
   await registerRESTRoutes(app)
@@ -123,6 +133,7 @@ async function main() {
   await registerOracleRoutes(app)
   await registerBasketRoutes(app)
   await registerFacilitatorRoutes(app)
+  await registerDiscoveryRoutes(app)
   await registerGraphQL(app)
   await registerWebSocket(app)
 
